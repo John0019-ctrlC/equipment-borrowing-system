@@ -1,1 +1,1 @@
-
+This is a collaborative work of group 6 in Application Development of BSIT3 class A. Inside this repository, you can see the group project about an equipment borrowing system. This will serve as an evidence for the group's effort and each member's contribution.
