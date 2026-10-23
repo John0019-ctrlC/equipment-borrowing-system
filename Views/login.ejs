@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Equipment Borrowing System</title>
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
     <main class="login-container">
@@ -15,6 +15,18 @@
             <h1>Welcome</h1>
             <p class="subtitle">Equipment Borrowing System</p>
             <p class="instruction">Sign in to manage your equipment requests.</p>
+
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="error-message" role="alert">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="success-message" role="status">
+                    <%= success %>
+                </div>
+            <% } %>
 
             <form action="/login" method="POST">
                 <div class="form-group">
