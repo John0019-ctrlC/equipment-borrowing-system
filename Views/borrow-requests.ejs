@@ -1,0 +1,49 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Borrowing Requests</h1>
+<p class="muted">Review and validate student equipment requests</p>
+
+<section class="stat-row">
+  <div class="stat"><span>Pending Request</span><strong><%= stats.pending %></strong></div>
+  <div class="stat"><span>Approved Today</span><strong><%= stats.approvedToday %></strong></div>
+  <div class="stat"><span>Items Borrowed</span><strong><%= stats.borrowed %></strong></div>
+  <div class="stat stat-alert"><span>Overdue Returns</span><strong><%= stats.overdue %></strong></div>
+</section>
+
+<h2>Requests Overview</h2>
+<form class="search-row" method="get" action="/borrowing/requests" role="search">
+  <input name="q" value="<%= q %>" placeholder="Search..." aria-label="Search requests">
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+<table class="table card">
+  <thead><tr><th>Request ID</th><th>Borrower Name</th><th>Dept / Course</th><th>Equipment</th><th>Date Needed</th><th>Return Date</th><th>Status</th><th>Action</th></tr></thead>
+  <tbody>
+    <% if (!list.length) { %><tr><td colspan="8" class="muted center">-- Nothing Follows --</td></tr><% } %>
+    <% list.forEach(function(b){ %>
+      <tr>
+        <td><%= b.code %></td><td><%= b.borrower %></td><td><%= b.course %></td><td><%= b.equipment %> × <%= b.quantity %></td>
+        <td><%= b.dateNeeded %></td><td><%= b.returnDate %></td>
+        <td><span class="badge badge-<%= b.status2 %>"><%= b.status2 %></span></td>
+        <td>
+          <a class="btn btn-sm <%= b.status === 'pending' ? 'btn-primary' : '' %>" href="/borrowing/requests/<%= b.id %>"><%= b.status === 'pending' ? 'Review' : 'View' %></a>
+          <% if (b.status === 'approved') { %>
+            <form method="post" action="/borrowing/requests/<%= b.id %>/returned" class="inline"><button class="btn btn-sm" type="submit">Mark returned</button></form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2>Overdue Returns</h2>
+<table class="table card table-red">
+  <thead><tr><th>Request ID</th><th>Borrower Name</th><th>Equipment</th><th>Return Date</th><th>Action</th></tr></thead>
+  <tbody>
+    <% if (!overdue.length) { %><tr><td colspan="5" class="muted center">No overdue items.</td></tr><% } %>
+    <% overdue.forEach(function(b){ %>
+      <tr><td><%= b.code %></td><td><%= b.borrower %></td><td><%= b.equipment %></td><td><%= b.returnDate %></td>
+        <td><a class="btn btn-sm" href="/borrowing/requests/<%= b.id %>">View</a></td></tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/foot') %>

@@ -1,0 +1,44 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Welcome back, <em><%= user.name.split(' ')[0] %></em>!</h1>
+<p class="muted">
+  <%= user.role === 'member' ? 'See what your organization has planned.' : 'Review and validate organization activity.' %>
+</p>
+
+<section class="stat-row" aria-label="Summary">
+  <% if (user.role === 'member') { %>
+    <div class="stat"><span>Events registered</span><strong><%= stats.registered %></strong></div>
+    <div class="stat"><span>Events attended</span><strong><%= stats.attended %></strong></div>
+    <div class="stat"><span>Active borrowings</span><strong><%= stats.activeBorrow %></strong></div>
+  <% } else { %>
+    <div class="stat"><span>Members</span><strong><%= stats.members %></strong></div>
+    <div class="stat"><span>Events</span><strong><%= stats.events %></strong></div>
+    <div class="stat"><span>Pending approvals</span><strong><%= stats.pendingApprovals %></strong></div>
+    <% if (user.role === 'admin') { %>
+      <div class="stat"><span>Pending borrow requests</span><strong><%= stats.pendingBorrow %></strong></div>
+      <div class="stat stat-alert"><span>Overdue returns</span><strong><%= stats.overdue %></strong></div>
+    <% } %>
+  <% } %>
+</section>
+
+<div class="two-col">
+  <section class="card">
+    <h2>Upcoming events</h2>
+    <% if (!upcoming.length) { %><p class="muted">Nothing scheduled.</p><% } %>
+    <ul class="plain">
+      <% upcoming.forEach(function(e){ %>
+        <li><a href="/events/<%= e.id %>"><strong><%= e.title %></strong></a><br><small><%= e.date %> · <%= e.time %> · <%= e.venue %></small></li>
+      <% }) %>
+    </ul>
+  </section>
+  <section class="card">
+    <h2>Latest announcements</h2>
+    <% if (!announcements.length) { %><p class="muted">No announcements yet.</p><% } %>
+    <ul class="plain">
+      <% announcements.forEach(function(a){ %>
+        <li><strong><%= a.title %></strong><br><small><%= a.message %></small></li>
+      <% }) %>
+    </ul>
+    <a href="/announcements">View all →</a>
+  </section>
+</div>
+<%- include('partials/foot') %>

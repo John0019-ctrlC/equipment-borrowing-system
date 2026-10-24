@@ -1,0 +1,36 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/events/<%= event.id %>"><%= event.title %></a> &gt; Attendance</p>
+<h1>Attendance</h1>
+<p class="muted"><%= event.title %> · <%= event.date %> · <%= event.venue %></p>
+
+<div class="two-col wide-left">
+  <section class="card">
+    <h2>Check-in</h2>
+    <div id="reader" class="reader" aria-label="QR scanner"></div>
+    <p id="scan-status" class="scan-status" role="status" aria-live="polite">Point the camera at a member's QR.</p>
+    <form id="manual-form">
+      <label for="schoolId">Manual check-in (School ID)</label>
+      <input id="schoolId" name="schoolId" autocomplete="off">
+      <button class="btn btn-primary" type="submit">Check in</button>
+    </form>
+    <p><strong id="count"><%= log.length %></strong> checked in</p>
+    <a class="btn" href="/attendance/<%= event.id %>/export.csv">Export CSV</a>
+  </section>
+
+  <section class="card">
+    <h2>Attendance log</h2>
+    <table class="table">
+      <thead><tr><th>School ID</th><th>Name</th><th>Course</th><th>Method</th><th>Time</th></tr></thead>
+      <tbody id="log-body">
+        <% log.forEach(function(a){ %>
+          <tr><td><%= a.schoolId %></td><td><%= a.name %></td><td><%= a.course %></td><td><%= a.method %></td><td><%= a.createdAt.slice(11,19) %></td></tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>window.EVENT_ID = '<%= event.id %>';</script>
+<script src="/js/scan.js"></script>
+<%- include('partials/foot') %>

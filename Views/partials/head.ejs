@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · BorrowBuddy</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="<%= user && user.role === 'member' ? 'theme-light' : 'theme-dark' %>">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <span class="brand-name">BorrowBuddy<small>Campus Equipment Borrowing System</small></span>
+    </div>
+    <p class="nav-heading">WORKSPACE</p>
+    <nav>
+      <% nav.forEach(function(item){ %>
+        <a class="nav-item <%= (typeof active !== 'undefined' && active === item.label) ? 'is-active' : '' %>" href="<%= item.href %>"><%= item.label %></a>
+      <% }) %>
+    </nav>
+    <form class="user-box" method="post" action="/logout">
+      <span class="avatar" aria-hidden="true"><%= user.name.charAt(0) %></span>
+      <span class="user-meta"><strong><%= user.name %></strong><small><%= user.role %></small></span>
+      <button class="link-btn" type="submit">Log out</button>
+    </form>
+  </aside>
+  <div class="content">
+    <header class="topbar">
+      <span class="bell" aria-label="Notifications">🔔</span>
+      <a class="help-btn" href="mailto:ccs@cspc.edu.ph">Help &amp; Support</a>
+    </header>
+    <main id="main" class="page">
+      <% if (flash) { %>
+        <div class="flash flash-<%= flash.type %>" role="status"><%= flash.text %></div>
+      <% } %>

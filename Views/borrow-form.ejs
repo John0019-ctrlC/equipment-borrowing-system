@@ -1,0 +1,32 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/equipment">Equipment</a> &gt; <%= item.category %></p>
+<h1>Borrow Equipment</h1>
+<p class="muted">Fill out the form below to submit a borrowing request for the selected equipment.</p>
+
+<section class="card item-banner">
+  <h2><%= item.name %></h2>
+  <p class="muted"><%= item.spec %></p>
+  <span class="badge badge-approved"><%= item.available %> out of <%= item.total %> available</span>
+</section>
+
+<% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+
+<form method="post" action="/borrowing/new/<%= item.id %>" class="card grid-form">
+  <div class="full"><h3>Borrowing Details</h3></div>
+  <div><label>Borrower Name</label><input value="<%= user.name %>" disabled></div>
+  <div><label>Student ID</label><input value="<%= user.schoolId %>" disabled></div>
+  <div><label>Department / Course</label><input value="<%= user.course %>" disabled></div>
+  <div><label>Item</label><input value="<%= item.name %>" disabled></div>
+  <div><label for="quantity">Quantity</label>
+    <input id="quantity" name="quantity" type="number" min="1" max="<%= item.available %>" value="<%= form.quantity || 1 %>" required></div>
+  <div><label for="dateNeeded">Date Needed</label><input id="dateNeeded" name="dateNeeded" type="date" value="<%= form.dateNeeded || '' %>" required></div>
+  <div><label for="returnDate">Expected Date Return</label><input id="returnDate" name="returnDate" type="date" value="<%= form.returnDate || '' %>" required></div>
+  <div class="full"><label for="purpose">Purpose of Borrowing</label><textarea id="purpose" name="purpose" rows="3" required><%= form.purpose || '' %></textarea></div>
+  <div class="full"><label for="notes">Notes (Optional)</label><textarea id="notes" name="notes" rows="2"><%= form.notes || '' %></textarea></div>
+  <div class="full"><label class="check"><input type="checkbox" name="agree" value="1" required> I acknowledge that I have agreed to the equipment borrowing rules and regulations.</label></div>
+  <div class="full actions">
+    <button class="btn btn-primary" type="submit">Submit Borrowing Request</button>
+    <a class="btn" href="/equipment">Cancel</a>
+  </div>
+</form>
+<%- include('partials/foot') %>

@@ -1,0 +1,40 @@
+<%- include('partials/head', { title: title }) %>
+<h1><%= category || ('Welcome, ' + user.name.split(' ')[0]) %></h1>
+<p class="muted"><%= category ? 'Bring your presentation, performances, and stories to life' : 'Big idea starts with the right equipment. What are you planning?' %></p>
+
+<% if (!category) { %>
+<section class="stat-row">
+  <div class="stat"><span>Equipments in our collection</span><strong><%= totals.total %></strong></div>
+  <div class="stat"><span>Ready to borrow</span><strong><%= totals.ready %></strong></div>
+  <div class="stat"><span>Your active borrowing</span><strong><%= totals.activeBorrow %></strong></div>
+</section>
+<% } %>
+
+<div class="tabs">
+  <a class="tab <%= !category ? 'is-active' : '' %>" href="/equipment">All</a>
+  <% counts.forEach(function(c){ %>
+    <a class="tab <%= category === c.name ? 'is-active' : '' %>" href="/equipment?category=<%= encodeURIComponent(c.name) %>"><%= c.name %> (<%= c.available %>)</a>
+  <% }) %>
+</div>
+
+<form class="search-row" method="get" action="/equipment" role="search">
+  <% if (category) { %><input type="hidden" name="category" value="<%= category %>"><% } %>
+  <input name="q" value="<%= q %>" placeholder="Search all equipment..." aria-label="Search equipment">
+  <button class="btn" type="submit">Search</button>
+</form>
+
+<div class="card-grid">
+  <% if (!list.length) { %><p class="muted">No equipment found.</p><% } %>
+  <% list.forEach(function(i){ %>
+    <article class="card">
+      <h3><%= i.name %></h3>
+      <p class="muted"><%= i.spec %></p>
+      <p class="<%= i.available ? 'ok' : 'warn' %>"><%= i.available %> out of <%= i.total %> available</p>
+      <small class="muted">Up to <%= i.maxDays %> days</small>
+      <div class="actions">
+        <a class="btn btn-primary <%= i.available ? '' : 'is-disabled' %>" href="/borrowing/new/<%= i.id %>" <%= i.available ? '' : 'aria-disabled="true"' %>>Borrow item</a>
+      </div>
+    </article>
+  <% }) %>
+</div>
+<%- include('partials/foot') %>

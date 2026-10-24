@@ -1,0 +1,40 @@
+<%- include('partials/head', { title: title }) %>
+<h1>My Borrowings</h1>
+<p class="muted">Track what you have borrowed and when it is due back.</p>
+
+<section class="stat-row">
+  <div class="stat"><span>Your active borrowing</span><strong><%= lists.active.length %></strong></div>
+  <div class="stat"><span>Pending requests</span><strong><%= lists.pending.length %></strong><small>Waiting for approval</small></div>
+  <div class="stat <%= lists.overdue.length ? 'stat-alert' : '' %>"><span>Overdue</span><strong><%= lists.overdue.length %></strong></div>
+</section>
+
+<div class="tabs">
+  <% ['active','pending','returned','overdue'].forEach(function(t){ %>
+    <a class="tab <%= tab === t ? 'is-active' : '' %>" href="/borrowing/mine?tab=<%= t %>"><%= t.charAt(0).toUpperCase() + t.slice(1) %> (<%= lists[t].length %>)</a>
+  <% }) %>
+</div>
+
+<% if (!lists[tab].length) { %><div class="card"><p class="muted">Nothing here.</p></div><% } %>
+<% lists[tab].forEach(function(b){ %>
+  <article class="card borrow-row">
+    <div>
+      <h3><%= b.equipment %></h3>
+      <p class="muted"><%= b.item.spec %> · Qty <%= b.quantity %> · Needed <%= b.dateNeeded %></p>
+      <p class="muted">Purpose: <%= b.purpose %></p>
+    </div>
+    <div class="due">
+      <small>Due date</small><strong><%= b.returnDate %></strong>
+      <span class="badge badge-<%= b.status2 %>"><%= b.status2 %></span>
+    </div>
+    <% if (b.status === 'approved') { %>
+      <form method="post" action="/borrowing/<%= b.id %>/extension">
+        <button class="btn btn-sm" type="submit" <%= b.extensionRequested ? 'disabled' : '' %>><%= b.extensionRequested ? 'Extension requested' : 'Request extension' %></button>
+      </form>
+    <% } %>
+  </article>
+<% }) %>
+
+<% if (dueSoon) { %>
+  <div class="card reminder"><strong>Reminder:</strong> Your <%= dueSoon.equipment %> is due on <%= dueSoon.returnDate %>. Please return it to the equipment office.</div>
+<% } %>
+<%- include('partials/foot') %>

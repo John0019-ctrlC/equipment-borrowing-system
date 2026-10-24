@@ -1,0 +1,46 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Events</h1>
+<p class="muted">Schedule and post organization activities.</p>
+
+<div class="tabs" role="tablist">
+  <% [['all','All'],['upcoming','Upcoming'],['completed','Completed'],['mine','My registrations']].forEach(function(t){ %>
+    <a class="tab <%= filter === t[0] ? 'is-active' : '' %>" href="/events?filter=<%= t[0] %>"><%= t[1] %></a>
+  <% }) %>
+</div>
+
+<% if (user.role === 'officer' || user.role === 'admin') { %>
+<details class="card">
+  <summary><strong>+ Post new event</strong></summary>
+  <form method="post" action="/events" class="grid-form">
+    <div><label for="t">Title</label><input id="t" name="title" required></div>
+    <div><label for="d">Date</label><input id="d" name="date" type="date" required></div>
+    <div><label for="tm">Time</label><input id="tm" name="time" type="time" required></div>
+    <div><label for="v">Venue</label><input id="v" name="venue" required></div>
+    <div><label for="l">Participant limit (0 = unlimited)</label><input id="l" name="limit" type="number" min="0" value="0"></div>
+    <div class="full"><label for="ds">Description</label><textarea id="ds" name="description" rows="2"></textarea></div>
+    <div class="full"><button class="btn btn-primary" type="submit">Post event</button></div>
+  </form>
+</details>
+<% } %>
+
+<div class="card-grid">
+  <% if (!events.length) { %><p class="muted">No events found.</p><% } %>
+  <% events.forEach(function(e){ %>
+    <article class="card event-card">
+      <h3><%= e.title %></h3>
+      <p class="muted"><%= e.date %> · <%= e.time %> · <%= e.venue %></p>
+      <p><%= e.registered %><%= e.limit ? ' / ' + e.limit : '' %> registered</p>
+      <% if (e.status === 'completed') { %><span class="badge badge-returned">Completed</span>
+      <% } else if (e.isFull) { %><span class="badge badge-pending">Full</span>
+      <% } else { %><span class="badge badge-approved">Open</span><% } %>
+      <% if (e.isRegistered) { %><span class="badge badge-info">Registered</span><% } %>
+      <div class="actions">
+        <a class="btn btn-primary btn-sm" href="/events/<%= e.id %>">View</a>
+        <% if (user.role === 'officer' || user.role === 'admin') { %>
+          <a class="btn btn-sm" href="/attendance/<%= e.id %>">Attendance</a>
+        <% } %>
+      </div>
+    </article>
+  <% }) %>
+</div>
+<%- include('partials/foot') %>

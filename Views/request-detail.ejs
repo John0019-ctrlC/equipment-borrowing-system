@@ -1,0 +1,33 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/borrowing/requests">Borrowing Requests</a> &gt; <%= b.code %></p>
+<h1>Request Details</h1>
+<p><strong><%= b.code %></strong> <span class="badge badge-<%= b.status2 %>"><%= b.status2 %></span></p>
+
+<section class="card">
+  <h2>Requester Information</h2>
+  <dl class="detail">
+    <dt>Borrower Name</dt><dd><%= b.borrower %></dd>
+    <dt>School ID</dt><dd><%= b.schoolId %></dd>
+    <dt>Department / Course</dt><dd><%= b.course %></dd>
+    <dt>Equipment</dt><dd><%= b.equipment %> × <%= b.quantity %></dd>
+    <dt>Date Needed</dt><dd><%= b.dateNeeded %></dd>
+    <dt>Return Date</dt><dd><%= b.returnDate %></dd>
+    <dt>Purpose</dt><dd><%= b.purpose %></dd>
+  </dl>
+  <p><span class="badge <%= b.item.available >= b.quantity ? 'badge-approved' : 'badge-overdue' %>">Item Availability</span>
+    <%= b.item.available %> of <%= b.item.total %> available in stock</p>
+
+  <% if (b.status === 'pending') { %>
+    <form method="post" action="/borrowing/requests/<%= b.id %>/decision">
+      <label for="comment">Admin Comments</label>
+      <textarea id="comment" name="comment" rows="3" placeholder="Add your comments (optional)..."></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" name="decision" value="approve" type="submit">Approve Request</button>
+        <button class="btn btn-danger" name="decision" value="reject" type="submit">Reject Request</button>
+      </div>
+    </form>
+  <% } else if (b.adminComment) { %>
+    <p><strong>Admin comment:</strong> <%= b.adminComment %></p>
+  <% } %>
+</section>
+<%- include('partials/foot') %>

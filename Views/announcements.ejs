@@ -1,0 +1,40 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Announcements</h1>
+<p class="muted">Post once, members see it in one place.</p>
+
+<div class="two-col wide-left">
+  <% if (user.role === 'officer' || user.role === 'admin') { %>
+  <section class="card">
+    <h2>New announcement</h2>
+    <form method="post" action="/announcements">
+      <label for="title">Title</label>
+      <input id="title" name="title" required>
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="4" placeholder="Write your announcement" required></textarea>
+      <label for="audience">Audience</label>
+      <select id="audience" name="audience">
+        <option>All members</option>
+        <option>Officers only</option>
+      </select>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Post</button>
+        <button class="btn" type="reset">Clear</button>
+      </div>
+    </form>
+  </section>
+  <% } %>
+  <section>
+    <% if (!items.length) { %><div class="card"><p class="muted">No announcements yet.</p></div><% } %>
+    <% items.forEach(function(a){ %>
+      <article class="card">
+        <h3><%= a.title %></h3>
+        <p><%= a.message %></p>
+        <small class="muted"><%= a.author %> · <%= a.createdAt.slice(0,10) %> · <%= a.audience %></small>
+        <% if (user.role === 'officer' || user.role === 'admin') { %>
+          <form method="post" action="/announcements/<%= a.id %>/delete" class="inline"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+        <% } %>
+      </article>
+    <% }) %>
+  </section>
+</div>
+<%- include('partials/foot') %>

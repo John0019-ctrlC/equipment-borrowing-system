@@ -1,0 +1,48 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Members</h1>
+<p class="muted">Add, update or remove organization members.</p>
+
+<form class="search-row" method="get" action="/members" role="search">
+  <input name="q" value="<%= q %>" placeholder="Search name, School ID, course..." aria-label="Search members">
+  <button class="btn" type="submit">Search</button>
+</form>
+
+<details class="card">
+  <summary><strong>+ Add member</strong></summary>
+  <form method="post" action="/members" class="grid-form">
+    <div><label for="name">Full name</label><input id="name" name="name" required></div>
+    <div><label for="schoolId">School ID</label><input id="schoolId" name="schoolId" required></div>
+    <div><label for="course">Course</label><input id="course" name="course" required></div>
+    <div><label for="email">Email</label><input id="email" name="email" type="email" required></div>
+    <div><label for="role">Role</label>
+      <select id="role" name="role"><% roles.forEach(function(r){ %><option><%= r %></option><% }) %></select></div>
+    <% if (user.role === 'admin') { %>
+      <div><label for="orgId">Organization</label>
+        <select id="orgId" name="orgId"><% orgs.forEach(function(o){ %><option value="<%= o.id %>"><%= o.name %></option><% }) %></select></div>
+    <% } %>
+    <div class="full"><button class="btn btn-primary" type="submit">Add member</button></div>
+  </form>
+</details>
+
+<table class="table card">
+  <thead><tr><th>School ID</th><th>Name</th><th>Course</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+    <% if (!members.length) { %><tr><td colspan="6" class="muted center">No members found.</td></tr><% } %>
+    <% members.forEach(function(m){ %>
+      <tr>
+        <td><%= m.schoolId %></td>
+        <td><input form="m-<%= m.id %>" name="name" value="<%= m.name %>" aria-label="Name"></td>
+        <td><input form="m-<%= m.id %>" name="course" value="<%= m.course %>" aria-label="Course"></td>
+        <td><select form="m-<%= m.id %>" name="role" aria-label="Role"><% roles.forEach(function(r){ %><option <%= m.role === r ? 'selected' : '' %>><%= r %></option><% }) %></select></td>
+        <td><span class="badge <%= m.active ? 'badge-approved' : 'badge-returned' %>"><%= m.active ? 'Active' : 'Removed' %></span></td>
+        <td>
+          <form id="m-<%= m.id %>" method="post" action="/members/<%= m.id %>/update" class="inline"><button class="btn btn-sm" type="submit">Save</button></form>
+          <% if (m.active && m.id !== user.id) { %>
+            <form method="post" action="/members/<%= m.id %>/remove" class="inline" onsubmit="return confirm('Remove this member?')"><button class="btn btn-danger btn-sm" type="submit">Remove</button></form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/foot') %>

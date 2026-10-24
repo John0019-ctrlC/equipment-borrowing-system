@@ -1,0 +1,54 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Equipments Inventory</h1>
+<p class="muted">Manage available equipment in the system</p>
+
+<section class="cat-row" aria-label="Categories">
+  <% counts.forEach(function(c){ %>
+    <div class="cat-card"><strong><%= c.name %></strong><small><%= c.items %> items</small></div>
+  <% }) %>
+</section>
+
+<h2>Equipment Overview</h2>
+<table class="table card table-navy">
+  <thead><tr><th>Item Name</th><th>Category</th><th>Total Quantity</th><th>Available</th><th>Actions</th></tr></thead>
+  <tbody>
+    <% if (!items.length) { %><tr><td colspan="5" class="muted center">No equipment yet.</td></tr><% } %>
+    <% items.forEach(function(i){ %>
+      <tr>
+        <td><input form="f-<%= i.id %>" name="name" value="<%= i.name %>" aria-label="Item name"></td>
+        <td><select form="f-<%= i.id %>" name="category" aria-label="Category"><% categories.forEach(function(c){ %><option <%= c === i.category ? 'selected' : '' %>><%= c %></option><% }) %></select></td>
+        <td><input form="f-<%= i.id %>" name="total" type="number" min="0" value="<%= i.total %>" aria-label="Total quantity" class="narrow"></td>
+        <td><%= i.available %></td>
+        <td>
+          <form id="f-<%= i.id %>" method="post" action="/equipment/<%= i.id %>/edit" class="inline"><button class="btn btn-sm" type="submit">Edit</button></form>
+          <form method="post" action="/equipment/<%= i.id %>/delete" class="inline" onsubmit="return confirm('Delete this item?')"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<button class="btn btn-primary add-fab" type="button" id="open-add">+ Add Equipment</button>
+
+<dialog id="add-dialog" class="modal">
+  <form method="post" action="/equipment">
+    <div class="modal-head"><h2>Add New Equipment</h2><button class="link-btn" type="button" id="close-add" aria-label="Close">✕</button></div>
+    <label for="a-name">Item Name</label>
+    <input id="a-name" name="name" required>
+    <div class="row">
+      <div><label for="a-cat">Category</label>
+        <select id="a-cat" name="category" required><% categories.forEach(function(c){ %><option><%= c %></option><% }) %></select></div>
+      <div><label for="a-qty">Quantity</label>
+        <input id="a-qty" name="quantity" type="number" min="1" value="1" required></div>
+    </div>
+    <label for="a-spec">Specification (optional)</label>
+    <input id="a-spec" name="spec">
+    <div class="actions"><button class="btn btn-primary" type="submit">Add Equipment</button></div>
+  </form>
+</dialog>
+<script>
+  const dlg = document.getElementById('add-dialog');
+  document.getElementById('open-add').onclick = () => dlg.showModal();
+  document.getElementById('close-add').onclick = () => dlg.close();
+</script>
+<%- include('partials/foot') %>
