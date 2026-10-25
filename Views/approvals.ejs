@@ -1,0 +1,54 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Approvals</h1>
+<p class="muted">Plans, financial reports and activity submissions for adviser review.</p>
+
+<div class="tabs" aria-label="Filter approvals">
+  <% [['','All'],['pending','Pending'],['approved','Approved'],['rejected','Rejected']].forEach(function(tab){ %>
+    <a class="tab <%= status === tab[0] ? 'is-active' : '' %>" href="/approvals<%= tab[0] ? '?status=' + tab[0] : '' %>"><%= tab[1] %></a>
+  <% }) %>
+</div>
+
+<% if (user.role === 'officer') { %>
+<details class="card">
+  <summary><strong>+ New submission</strong></summary>
+  <form method="post" action="/approvals">
+    <label for="type">Type</label>
+    <select id="type" name="type" required>
+      <% types.forEach(function(t){ %><option><%= t %></option><% }) %>
+    </select>
+    <label for="title">Title</label>
+    <input id="title" name="title" required>
+    <label for="details">Details</label>
+    <textarea id="details" name="details" rows="3" required></textarea>
+    <label for="amount">Amount (₱, if financial)</label>
+    <input id="amount" name="amount" type="number" min="0" step="0.01" value="0">
+    <button class="btn btn-primary" type="submit">Submit for review</button>
+  </form>
+</details>
+<% } %>
+
+<table class="table card">
+  <thead><tr><th>Type</th><th>Title</th><th>Submitted by</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+  <tbody>
+    <% if (!items.length) { %><tr><td colspan="6" class="muted center">Nothing submitted yet.</td></tr><% } %>
+    <% items.forEach(function(a){ %>
+      <tr>
+        <td><%= a.type %></td>
+        <td><strong><%= a.title %></strong><br><small class="muted"><%= a.details %></small></td>
+        <td><%= a.submitter %></td>
+        <td>₱<%= a.amount %></td>
+        <td><span class="badge badge-<%= a.status %>"><%= a.status %></span><% if (a.reviewNote) { %><br><small><%= a.reviewNote %></small><% } %></td>
+        <td>
+          <% if (user.role === 'adviser' && a.status === 'pending') { %>
+            <form method="post" action="/approvals/<%= a.id %>/decision">
+              <input name="note" placeholder="Note (optional)" aria-label="Review note">
+              <button class="btn btn-primary btn-sm" name="decision" value="approved">Approve</button>
+              <button class="btn btn-danger btn-sm" name="decision" value="rejected">Reject</button>
+            </form>
+          <% } else { %>—<% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/foot') %>

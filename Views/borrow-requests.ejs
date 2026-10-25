@@ -1,0 +1,155 @@
+<%- include('partials/head', { title: title, styles: ['/css/borrowing-requests.css'] }) %>
+
+<section class="borrowing-requests">
+  <header class="borrowing-requests__heading">
+    <div>
+      <p class="borrowing-requests__eyebrow">EQUIPMENT MANAGEMENT</p>
+      <h1>Borrowing Requests</h1>
+      <p class="muted">Review and track equipment borrowing requests.</p>
+    </div>
+  </header>
+
+  <% var requestCards = [
+    { key: '', label: 'All Requests', count: stats.total, description: 'Every borrowing request', icon: 'all' },
+    { key: 'pending', label: 'Pending', count: stats.pending, description: 'Waiting for review', icon: 'pending' },
+    { key: 'overdue', label: 'Overdue', count: stats.overdue, description: 'Past their return date', icon: 'overdue' },
+    { key: 'approved-today', label: 'Approved Today', count: stats.approvedToday, description: 'Approved on this date', icon: 'approved' }
+  ]; %>
+  <nav class="request-summary-cards" aria-label="Filter borrowing requests">
+    <% requestCards.forEach(function(card) { %>
+      <a class="request-summary-card request-summary-card--<%= card.icon %> <%= status === card.key ? 'is-active' : '' %>"
+        href="/borrowing/requests<%= card.key ? '?status=' + card.key : '' %>"
+        <%= status === card.key ? 'aria-current="page"' : '' %>>
+        <span class="request-summary-card__icon" aria-hidden="true">
+          <% if (card.icon === 'all') { %>
+            <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+          <% } else if (card.icon === 'pending') { %>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+          <% } else if (card.icon === 'overdue') { %>
+            <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4m0 4h.01"></path></svg>
+          <% } else { %>
+            <svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path><path d="M21 12a9 9 0 1 1-5.2-8.2"></path></svg>
+          <% } %>
+        </span>
+        <span class="request-summary-card__content">
+          <span class="request-summary-card__label"><%= card.label %></span>
+          <strong><%= card.count %></strong>
+          <span class="request-summary-card__description"><%= card.description %></span>
+        </span>
+      </a>
+    <% }); %>
+  </nav>
+
+  <section class="request-list-panel" aria-labelledby="request-list-title">
+    <div class="request-list-panel__header">
+      <div>
+        <h2 id="request-list-title"><%= status === 'pending' ? 'Pending Requests' : status === 'overdue' ? 'Overdue Returns' : status === 'approved-today' ? 'Approved Today' : 'All Requests' %></h2>
+        <p><%= list.length %> request<%= list.length === 1 ? '' : 's' %><%= q ? ' matching your search' : '' %></p>
+      </div>
+      <form class="request-search" method="get" action="/borrowing/requests" role="search">
+        <% if (status) { %><input type="hidden" name="status" value="<%= status %>"><% } %>
+        <label class="visually-hidden" for="borrowing-request-search">Search requests</label>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+        <input id="borrowing-request-search" name="q" value="<%= q %>" placeholder="Search requests...">
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+
+    <% if (!list.length) { %>
+      <div class="request-empty-state" role="status">
+        <span class="request-empty-state__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 4h8l4 4v12H4V4h4Z"></path><path d="M8 4v5h8V4M8 14h8M8 17h5"></path></svg>
+        </span>
+        <h3><%= q ? 'No matching requests' : status === 'pending' ? 'No pending requests' : status === 'overdue' ? 'No overdue requests' : status === 'approved-today' ? 'No approved requests today' : 'No borrowing requests yet' %></h3>
+        <p><%= q ? 'Try another search term.' : status === 'pending' ? 'There are no requests waiting for review.' : status === 'overdue' ? 'There are no equipment requests past their return date.' : status === 'approved-today' ? 'No borrowing requests have been approved today.' : 'New borrowing requests will appear here.' %></p>
+      </div>
+    <% } else { %>
+      <div class="request-table-scroll">
+        <table class="table request-table">
+          <thead><tr><th>Request ID</th><th>Borrower</th><th>Dept / Course</th><th>Equipment</th><th>Date Needed</th><th>Return Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <% list.forEach(function(b) { %>
+              <tr>
+                <td><strong><%= b.code %></strong></td>
+                <td><%= b.borrower || 'Unknown' %></td>
+                <td><%= b.course || '—' %></td>
+                <td><%= b.equipment || 'Unknown item' %> × <%= b.quantity %></td>
+                <td><%= b.dateNeeded %></td>
+                <td><%= b.returnDate %></td>
+                <td><span class="request-status request-status--<%= b.status2 %>"><%= b.status2 %></span></td>
+                <td>
+                  <div class="request-row-actions">
+                    <button class="btn btn-sm <%= b.status === 'pending' ? 'btn-primary' : '' %>" type="button"
+                      data-view-request
+                      data-id="<%= b.id %>"
+                      data-code="<%= b.code %>"
+                      data-status="<%= b.status %>"
+                      data-display-status="<%= b.status2 %>"
+                      data-borrower="<%= b.borrower || 'Unknown' %>"
+                      data-school-id="<%= b.schoolId || 'Not provided' %>"
+                      data-course="<%= b.course || 'Not provided' %>"
+                      data-equipment="<%= b.equipment || 'Unknown item' %>"
+                      data-quantity="<%= b.quantity %>"
+                      data-date-needed="<%= b.dateNeeded %>"
+                      data-return-date="<%= b.returnDate %>"
+                      data-purpose="<%= b.purpose || 'No purpose provided.' %>"
+                      data-notes="<%= b.notes || '' %>"
+                      data-admin-comment="<%= b.adminComment || '' %>"
+                      data-available="<%= b.item.available %>"
+                      data-total="<%= b.item.total %>"><%= b.status === 'pending' ? 'Review' : 'View' %></button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+</section>
+<dialog class="request-detail-dialog" id="request-detail-dialog" aria-labelledby="request-dialog-title">
+  <div class="request-detail-dialog__content">
+    <header class="request-detail-dialog__header">
+      <div>
+        <p class="borrowing-requests__eyebrow">BORROWING REQUEST</p>
+        <h2 id="request-dialog-title">Request Details</h2>
+        <p class="request-detail-dialog__code" id="request-dialog-code"></p>
+      </div>
+      <button class="request-dialog-close" type="button" data-close-request aria-label="Close request details">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
+    </header>
+    <div class="request-detail-dialog__body">
+      <span class="request-status" id="request-dialog-status"></span>
+      <h3 class="request-detail-dialog__section-title">Requester Information</h3>
+      <dl class="request-detail-grid">
+        <div><dt>Borrower Name</dt><dd id="request-dialog-borrower"></dd></div>
+        <div><dt>School ID</dt><dd id="request-dialog-school-id"></dd></div>
+        <div><dt>Department / Course</dt><dd id="request-dialog-course"></dd></div>
+        <div><dt>Equipment</dt><dd id="request-dialog-equipment"></dd></div>
+        <div><dt>Date Needed</dt><dd id="request-dialog-date-needed"></dd></div>
+        <div><dt>Return Date</dt><dd id="request-dialog-return-date"></dd></div>
+        <div class="request-detail-grid__wide"><dt>Purpose</dt><dd id="request-dialog-purpose"></dd></div>
+        <div class="request-detail-grid__wide" id="request-dialog-notes-row"><dt>Additional Notes</dt><dd id="request-dialog-notes"></dd></div>
+      </dl>
+      <p class="request-availability" id="request-dialog-availability"></p>
+      <p class="request-admin-comment" id="request-dialog-admin-comment" hidden></p>
+      <form class="request-decision-form" id="request-decision-form" method="post">
+        <label for="request-admin-comment-input">Admin Comments <span>(optional)</span></label>
+        <textarea id="request-admin-comment-input" name="comment" rows="3" placeholder="Add your comments..."></textarea>
+        <div class="request-detail-dialog__actions">
+          <button class="btn btn-danger" type="submit" name="decision" value="reject">Reject Request</button>
+          <button class="btn btn-primary" type="submit" name="decision" value="approve">Approve Request</button>
+        </div>
+      </form>
+      <form class="request-return-form" id="request-return-form" method="post" onsubmit="return confirm('Mark this borrowing request as returned?');">
+        <button class="btn btn-primary" type="submit">Mark as Returned</button>
+      </form>
+    </div>
+    <footer class="request-detail-dialog__footer">
+      <button class="btn" type="button" data-close-request>Close</button>
+    </footer>
+  </div>
+</dialog>
+<script src="/js/borrowing-requests.js"></script>
+<%- include('partials/foot') %>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="<%= user && user.role === 'member' ? 'light' : 'dark' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · CCS OrgHub</title>
+  <script>
+    try {
+      const savedMode = localStorage.getItem('theme-mode');
+      if (savedMode === 'light' || savedMode === 'dark') {
+        document.documentElement.dataset.mode = savedMode;
+      }
+      if (localStorage.getItem('sidebar-collapsed') === 'true') {
+        document.documentElement.dataset.sidebarCollapsed = 'true';
+      }
+    } catch (error) {
+      console.error('Unable to read the saved theme preference.', error);
+    }
+  </script>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <% if (typeof styles !== 'undefined') { styles.forEach(function(style) { %>
+    <link rel="stylesheet" href="<%= style %>">
+  <% }); } %>
+</head>
+<body class="<%= user && user.role === 'member' ? 'theme-light' : 'theme-dark' %>">
+<script>
+  document.body.classList.toggle('theme-dark', document.documentElement.dataset.mode === 'dark');
+  document.body.classList.toggle('theme-light', document.documentElement.dataset.mode === 'light');
+  document.body.classList.toggle('sidebar-collapsed', document.documentElement.dataset.sidebarCollapsed === 'true');
+</script>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <span class="brand-name">CCS OrgHub<small>Student Organization Management</small></span>
+      <button class="sidebar-toggle" type="button" aria-label="Collapse navigation" aria-expanded="true" aria-controls="primary-navigation" title="Collapse navigation">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+    <p class="nav-heading">WORKSPACE</p>
+    <nav id="primary-navigation" aria-label="Workspace">
+      <% nav.forEach(function(item){ %>
+        <a class="nav-item <%= (typeof active !== 'undefined' && active === item.label) ? 'is-active' : '' %>" href="<%= item.href %>" aria-label="<%= item.label %>" title="<%= item.label %>">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <% if (item.label === 'Dashboard') { %>
+                <rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="10" width="8" height="11" rx="1.5"></rect><rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
+              <% } else if (item.label === 'Announcements') { %>
+                <path d="M4 14V9a1 1 0 0 1 1-1h3l9-4v14l-9-4H5a1 1 0 0 1-1-1Z"></path><path d="m8 14 2 6h4l-2.5-5.3M20 9a4 4 0 0 1 0 5"></path>
+              <% } else if (item.label === 'Events') { %>
+                <rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"></path>
+              <% } else if (item.label === 'Members') { %>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
+              <% } else if (item.label === 'Reports') { %>
+                <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>
+              <% } else if (item.label === 'Approvals') { %>
+                <circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path>
+              <% } else if (item.label === 'Compliance') { %>
+                <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path><path d="m9 12 2 2 4-4"></path>
+              <% } else if (item.label === 'Equipments' || item.label === 'Equipments Inventory') { %>
+                <path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5M3 16l9 5 9-5M12 8v5"></path>
+              <% } else if (item.label === 'My Borrowings' || item.label === 'Borrowing Request' || item.label === 'Borrowing Records') { %>
+                <path d="M8 4H6a2 2 0 0 0-2 2v14h16V6a2 2 0 0 0-2-2h-2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M8 11h8M8 15h8"></path>
+              <% } else { %>
+                <circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path>
+              <% } %>
+            </svg>
+          </span>
+          <span class="nav-label"><%= item.label %></span>
+        </a>
+      <% }) %>
+    </nav>
+    <div class="user-box" data-account-menu>
+      <button class="user-account-toggle" type="button" data-account-toggle aria-expanded="false" aria-controls="account-logout">
+        <span class="avatar" aria-hidden="true"><%= user.name.charAt(0) %></span>
+        <span class="user-meta"><strong><%= user.name %></strong><small><%= user.role %></small></span>
+        <svg class="user-account-chevron" aria-hidden="true" viewBox="0 0 20 20"><path d="m5 7 5 5 5-5"></path></svg>
+      </button>
+      <form class="account-logout" id="account-logout" method="post" action="/logout" hidden>
+        <button class="account-logout__button" type="submit">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5m5 5H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>
+          <span>Log out</span>
+        </button>
+      </form>
+    </div>
+  </aside>
+  <div class="content">
+    <header class="topbar">
+      <div class="topbar-actions">
+        <span class="bell" aria-label="Notifications">🔔</span>
+        <button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" title="Switch to dark mode">
+          <svg class="icon-sun" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+          </svg>
+          <svg class="icon-moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"></path>
+          </svg>
+        </button>
+      </div>
+      <a class="help-btn" href="mailto:ccs@cspc.edu.ph">Help &amp; Support</a>
+    </header>
+    <main id="main" class="page <%= title === 'Dashboard' ? 'dashboard-page' : '' %>">
+      <% if (flash) { %>
+        <div class="flash flash-<%= flash.type %>" role="status"><%= flash.text %></div>
+      <% } %>

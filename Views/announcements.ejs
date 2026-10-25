@@ -1,0 +1,62 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Announcements</h1>
+<p class="muted">Browse the latest updates and notices.</p>
+
+<% if (user.role === 'officer' || user.role === 'admin') { %>
+<details class="card">
+  <summary><strong>+ Post new announcement</strong></summary>
+  <form method="post" action="/announcements">
+    <label for="announcement-title">Title</label>
+    <input id="announcement-title" name="title" required>
+    <label for="announcement-message">Message</label>
+    <textarea id="announcement-message" name="message" rows="4" placeholder="Write your announcement" required></textarea>
+    <label for="announcement-audience">Audience</label>
+    <select id="announcement-audience" name="audience">
+      <option>All members</option>
+      <option>Officers only</option>
+    </select>
+    <div class="actions"><button class="btn btn-primary" type="submit">Post announcement</button></div>
+  </form>
+</details>
+<% } %>
+
+<section class="card table-card">
+  <h2 class="table-card__title">Announcements Overview</h2>
+  <form class="table-search" method="get" action="/announcements">
+    <label class="visually-hidden" for="announcement-search">Search announcements</label>
+    <input id="announcement-search" name="q" type="search" value="<%= q %>" placeholder="Search announcements by title, message, author, or audience">
+    <button class="btn" type="submit">Search</button>
+  </form>
+  <div class="table-scroll">
+    <table class="table overview-table">
+      <thead><tr><th>Announcement</th><th>Date Posted</th><th>Audience</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        <% if (!items.length) { %>
+          <tr><td colspan="5" class="table-empty">No announcements found.</td></tr>
+        <% } %>
+        <% items.forEach(function(item){ %>
+          <tr>
+            <td><strong><%= item.title %></strong><small><%= item.message.length > 100 ? item.message.slice(0, 100) + '…' : item.message %></small></td>
+            <td><%= item.createdAt.slice(0, 10) %></td>
+            <td><%= item.audience || 'All members' %></td>
+            <td><span class="badge badge-approved"><%= item.displayStatus || 'Live' %></span></td>
+            <td>
+              <div class="table-actions">
+                <a class="btn btn-primary btn-sm" href="/announcements/<%= item.id %>">View</a>
+                <% if (user.role === 'admin') { %>
+                  <a class="btn btn-sm" href="/announcements/<%= item.id %>/edit">Modify</a>
+                <% } %>
+                <% if (user.role === 'admin' || user.role === 'officer') { %>
+                  <form method="post" action="/announcements/<%= item.id %>/delete" class="inline" onsubmit="return confirm('Delete this announcement?');">
+                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                  </form>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+<%- include('partials/foot') %>

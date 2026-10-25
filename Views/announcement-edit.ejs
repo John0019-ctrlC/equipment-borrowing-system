@@ -1,0 +1,19 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/announcements">Announcements</a> &gt; Modify announcement</p>
+<h1>Modify announcement</h1>
+<section class="card edit-form-card">
+  <form method="post" action="/announcements/<%= announcement.id %>/edit">
+    <label for="announcement-title">Title</label>
+    <input id="announcement-title" name="title" value="<%= announcement.title %>" required>
+    <label for="announcement-message">Message</label>
+    <textarea id="announcement-message" name="message" rows="6" required><%= announcement.message %></textarea>
+    <label for="announcement-audience">Audience</label>
+    <select id="announcement-audience" name="audience">
+      <% [['All members','All members'],['Officers only','Officers only']].forEach(function(audience){ %>
+        <option value="<%= audience[0] %>" <%= (announcement.audience || 'All members') === audience[0] ? 'selected' : '' %>><%= audience[1] %></option>
+      <% }) %>
+    </select>
+    <div class="actions"><button class="btn btn-primary" type="submit">Save changes</button><a class="btn" href="/announcements">Cancel</a></div>
+  </form>
+</section>
+<%- include('partials/foot') %>

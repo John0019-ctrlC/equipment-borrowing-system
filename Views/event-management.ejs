@@ -1,0 +1,167 @@
+<%- include('partials/head', { title: title, styles: ['/css/event-management.css'] }) %>
+
+<section class="event-management">
+  <header class="event-page-heading">
+    <div>
+      <p class="event-eyebrow">ADMINISTRATION</p>
+      <h1>Events</h1>
+      <p>Create, schedule, and manage events for students and faculty.</p>
+    </div>
+    <button class="btn btn-primary event-create" type="button" data-create-event>
+      <span aria-hidden="true">+</span> Create New Event
+    </button>
+  </header>
+
+  <section class="event-stats" aria-label="Event summary">
+    <article class="event-stat">
+      <span class="event-stat__label">Total Events</span>
+      <strong><%= stats.total %></strong>
+      <span class="event-stat__hint">All scheduled activities</span>
+    </article>
+    <article class="event-stat">
+      <span class="event-stat__label">Upcoming</span>
+      <strong><%= stats.upcoming %></strong>
+      <span class="event-stat__hint event-stat__hint--upcoming">Open for registration</span>
+    </article>
+    <article class="event-stat">
+      <span class="event-stat__label">Registrations</span>
+      <strong><%= stats.registrations %></strong>
+      <span class="event-stat__hint">Across all events</span>
+    </article>
+    <article class="event-stat event-stat--completed">
+      <span class="event-stat__label">Completed</span>
+      <strong><%= stats.completed %></strong>
+      <span class="event-stat__hint">Finished activities</span>
+    </article>
+  </section>
+
+  <section class="event-list-panel">
+    <form class="event-filters" method="get" action="/events" role="search">
+      <label class="event-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+        <span class="visually-hidden">Search events</span>
+        <input type="search" name="q" value="<%= filters.q %>" placeholder="Search events by name, date, or location...">
+      </label>
+      <label class="visually-hidden" for="event-status-filter">Event status</label>
+      <select id="event-status-filter" name="status">
+        <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Status: All</option>
+        <option value="open" <%= filters.status === 'open' ? 'selected' : '' %>>Status: Open</option>
+        <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Status: Completed</option>
+        <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Status: Cancelled</option>
+      </select>
+      <button class="btn event-filter-button" type="submit">Filter</button>
+    </form>
+
+    <div class="event-table-scroll">
+      <table class="event-table">
+        <thead>
+          <tr><th>Event</th><th>Date &amp; Time</th><th>Location</th><th>Registrations</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% if (!events.length) { %>
+            <tr><td colspan="6" class="event-empty">No events match these filters.</td></tr>
+          <% } %>
+          <% events.forEach(function(event) { %>
+            <tr>
+              <td class="event-cell">
+                <div>
+                  <a class="event-row-title" href="/events/<%= event.id %>"><%= event.title %></a>
+                  <p><%= event.description || 'No description provided.' %></p>
+                </div>
+              </td>
+              <td class="event-date"><%= event.date %><small><%= event.time || 'Time not set' %></small></td>
+              <td><span class="event-location"><%= event.venue %></span></td>
+              <td>
+                <span class="event-registration-count"><%= event.registered %><% if (event.limit) { %> / <%= event.limit %><% } %></span>
+                <% if (event.isFull) { %><small class="event-full-hint">Capacity reached</small><% } %>
+              </td>
+              <td>
+                <span class="event-status event-status--<%= event.status === 'cancelled' ? 'cancelled' : event.status === 'completed' ? 'completed' : 'open' %>">
+                  <%= event.status === 'open' && event.isFull ? 'Full' : (event.status || 'open') %>
+                </span>
+              </td>
+              <td>
+                <div class="event-actions">
+                  <a class="event-icon-button" href="/events/<%= event.id %>" title="View event" aria-label="View <%= event.title %>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </a>
+                  <button class="event-icon-button" type="button" title="Edit event" aria-label="Edit <%= event.title %>"
+                    data-edit-event
+                    data-id="<%= event.id %>"
+                    data-title="<%= event.title %>"
+                    data-date="<%= event.date %>"
+                    data-time="<%= event.time %>"
+                    data-venue="<%= event.venue %>"
+                    data-limit="<%= event.limit || 0 %>"
+                    data-status="<%= event.status || 'open' %>"
+                    data-description="<%= event.description || '' %>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                  </button>
+                  <form method="post" action="/events/<%= event.id %>/delete" onsubmit="return confirm('Delete this event? Its registrations and attendance records will also be removed.');">
+                    <button class="event-icon-button event-icon-button--delete" type="submit" title="Delete event" aria-label="Delete <%= event.title %>">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"></path></svg>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<dialog class="event-dialog" id="event-editor" aria-labelledby="event-editor-title">
+  <form class="event-editor-form" method="post" action="/events" id="event-form">
+    <header class="event-dialog__header">
+      <div>
+        <p class="event-eyebrow">EVENT EDITOR</p>
+        <h2 id="event-editor-title">Create event</h2>
+      </div>
+      <button class="event-icon-button" type="button" data-close-event aria-label="Close editor">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
+    </header>
+    <div class="event-dialog__body">
+      <label for="event-title">Event name</label>
+      <input id="event-title" name="title" maxlength="160" placeholder="e.g. CCS Week Kickoff" required>
+
+      <div class="event-form-grid">
+        <div>
+          <label for="event-date">Date</label>
+          <input id="event-date" name="date" type="date" required>
+        </div>
+        <div>
+          <label for="event-time">Time</label>
+          <input id="event-time" name="time" type="time" required>
+        </div>
+        <div>
+          <label for="event-venue">Location</label>
+          <input id="event-venue" name="venue" required>
+        </div>
+        <div>
+          <label for="event-limit">Participant limit <span class="event-optional">(0 = unlimited)</span></label>
+          <input id="event-limit" name="limit" type="number" min="0" value="0" required>
+        </div>
+        <div class="event-status-field" data-event-status-field>
+          <label for="event-status">Status</label>
+          <select id="event-status" name="status">
+            <option value="open">Open</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="event-description">Description <span class="event-optional">(optional)</span></label>
+      <textarea id="event-description" name="description" rows="5" placeholder="Share details about this activity..."></textarea>
+    </div>
+    <footer class="event-dialog__footer">
+      <button class="btn event-secondary-button" type="button" data-close-event>Cancel</button>
+      <button class="btn btn-primary" type="submit" id="event-submit-button">Create Event</button>
+    </footer>
+  </form>
+</dialog>
+<script src="/js/event-management.js"></script>
+<%- include('partials/foot') %>

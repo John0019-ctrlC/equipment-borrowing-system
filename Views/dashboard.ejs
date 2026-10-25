@@ -1,0 +1,175 @@
+<%- include('partials/head', { title: title }) %>
+
+<!-- ── Dashboard Header ── -->
+<div class="dash-header">
+  <div>
+    <h1 class="dash-title">Welcome back, <em><%= user.name.split(' ')[0] %></em></h1>
+    <p class="dash-subtitle">
+      <%= user.role === 'member' ? 'See what your organization has planned.' : 'Here\'s what\'s happening across your organization today.' %>
+    </p>
+  </div>
+  <div class="dash-date">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+  </div>
+</div>
+
+<!-- ── Stat Cards ── -->
+<section class="stat-row dashboard-stats dashboard-stats--<%= user.role %>" aria-label="Summary">
+  <% if (user.role === 'member') { %>
+    <a class="stat-card" href="/events?filter=mine" aria-label="View your <%= stats.registered %> registered events">
+      <div class="stat-card__icon stat-card__icon--blue">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Events Registered</span>
+        <strong class="stat-card__value"><%= stats.registered %></strong>
+      </div>
+    </a>
+    <a class="stat-card" href="/events?filter=attended" aria-label="View your <%= stats.attended %> attended events">
+      <div class="stat-card__icon stat-card__icon--green">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Events Attended</span>
+        <strong class="stat-card__value"><%= stats.attended %></strong>
+      </div>
+    </a>
+    <a class="stat-card" href="/borrowing/mine?tab=active" aria-label="View your <%= stats.activeBorrow %> active borrowings">
+      <div class="stat-card__icon stat-card__icon--purple">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Active Borrowings</span>
+        <strong class="stat-card__value"><%= stats.activeBorrow %></strong>
+      </div>
+    </a>
+  <% } else { %>
+    <% if (user.role === 'admin' || user.role === 'officer') { %>
+    <a class="stat-card" href="/members?role=member&amp;status=active" aria-label="View <%= stats.members %> active members">
+      <div class="stat-card__icon stat-card__icon--blue">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Total Members</span>
+        <strong class="stat-card__value"><%= stats.members %></strong>
+      </div>
+    </a>
+    <% } %>
+    <a class="stat-card" href="/events" aria-label="View all <%= stats.events %> events">
+      <div class="stat-card__icon stat-card__icon--green">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Total Events</span>
+        <strong class="stat-card__value"><%= stats.events %></strong>
+      </div>
+    </a>
+    <a class="stat-card" href="/approvals?status=pending" aria-label="View <%= stats.pendingApprovals %> pending approvals">
+      <div class="stat-card__icon stat-card__icon--amber">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Pending Approvals</span>
+        <strong class="stat-card__value"><%= stats.pendingApprovals %></strong>
+      </div>
+    </a>
+    <% if (user.role === 'admin') { %>
+      <a class="stat-card" href="/borrowing/requests?status=pending" aria-label="View <%= stats.pendingBorrow %> pending borrowing requests">
+        <div class="stat-card__icon stat-card__icon--purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Pending Borrows</span>
+          <strong class="stat-card__value"><%= stats.pendingBorrow %></strong>
+        </div>
+      </a>
+      <a class="stat-card" href="/borrowing/requests?status=approved-today" aria-label="View <%= stats.approvedBorrowToday %> borrowing requests approved today">
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><path d="M21 12a9 9 0 1 1-5.2-8.2"></path></svg>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Approved Today</span>
+          <strong class="stat-card__value"><%= stats.approvedBorrowToday %></strong>
+        </div>
+      </a>
+      <a class="stat-card stat-card--danger" href="/borrowing/requests?status=overdue" aria-label="View <%= stats.overdue %> overdue returns">
+        <div class="stat-card__icon stat-card__icon--red">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Overdue Returns</span>
+          <strong class="stat-card__value"><%= stats.overdue %></strong>
+        </div>
+      </a>
+    <% } %>
+  <% } %>
+</section>
+
+<!-- ── Fixed-height Events and Announcements previews ── -->
+<div class="dash-grid">
+  <section class="dash-card" aria-labelledby="dashboard-events-title">
+    <div class="dash-card__header">
+      <div class="dash-card__title-group">
+        <div class="dash-card__icon-wrap dash-card__icon-wrap--green" aria-hidden="true">▦</div>
+        <div>
+          <h2 class="dash-card__title" id="dashboard-events-title">Upcoming Events</h2>
+          <p class="dash-card__subtitle">Next <%= upcoming.length %> scheduled event<%= upcoming.length !== 1 ? 's' : '' %></p>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card__body dashboard-table-wrap">
+      <% if (!upcoming.length) { %>
+        <p class="dashboard-empty">No upcoming events scheduled.</p>
+      <% } else { %>
+        <table class="table dashboard-table">
+          <thead><tr><th>Event</th><th>Date</th><th>Location</th><th>Status</th></tr></thead>
+          <tbody>
+            <% upcoming.forEach(function(event){ %>
+              <tr>
+                <td><a href="/events/<%= event.id %>"><%= event.title %></a></td>
+                <td><%= event.date %><% if (event.time) { %><small><%= event.time %></small><% } %></td>
+                <td><%= event.venue %></td>
+                <td><span class="badge <%= event.status === 'completed' ? 'badge-returned' : event.status === 'cancelled' ? 'badge-rejected' : event.isFull ? 'badge-pending' : 'badge-approved' %>"><%= event.status === 'open' && event.isFull ? 'Full' : (event.status || 'open') %></span></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+    <div class="dash-card__footer"><a href="/events" class="dash-card__link">View all events <span aria-hidden="true">→</span></a></div>
+  </section>
+
+  <section class="dash-card" aria-labelledby="dashboard-announcements-title">
+    <div class="dash-card__header">
+      <div class="dash-card__title-group">
+        <div class="dash-card__icon-wrap dash-card__icon-wrap--blue" aria-hidden="true">◉</div>
+        <div>
+          <h2 class="dash-card__title" id="dashboard-announcements-title">Announcements</h2>
+          <p class="dash-card__subtitle">Latest <%= announcements.length %> updates</p>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card__body dashboard-table-wrap">
+      <% if (!announcements.length) { %>
+        <p class="dashboard-empty">No announcements yet.</p>
+      <% } else { %>
+        <table class="table dashboard-table">
+          <thead><tr><th>Announcement</th><th>Posted</th><th>Audience</th><th>Status</th></tr></thead>
+          <tbody>
+            <% announcements.forEach(function(announcement){ %>
+              <tr>
+                <td><a href="/announcements/<%= announcement.id %>"><%= announcement.title %></a></td>
+                <td><%= announcement.createdAt.slice(0, 10) %></td>
+                <td><%= announcement.audience || 'All members' %></td>
+                <td><span class="badge badge-approved">Published</span></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+    <div class="dash-card__footer"><a href="/announcements" class="dash-card__link">View all announcements <span aria-hidden="true">→</span></a></div>
+  </section>
+</div>
+<%- include('partials/foot') %>

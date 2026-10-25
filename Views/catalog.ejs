@@ -1,0 +1,184 @@
+<%- include('partials/head', { title: title, styles: ['/css/student-catalog.css'] }) %>
+<section class="student-catalog">
+  <header class="catalog-heading">
+    <div>
+      <p class="catalog-eyebrow">EQUIPMENT CATALOG</p>
+      <h1><%= category || ('Welcome, ' + user.name.split(' ')[0]) %></h1>
+      <p><%= category ? 'Browse equipment available in this category.' : 'Big ideas start with the right equipment. What are you planning?' %></p>
+    </div>
+    <% if (category) { %><a class="catalog-clear-filter" href="/equipment">Browse all categories <span aria-hidden="true">→</span></a><% } %>
+  </header>
+
+  <% if (!category) { %>
+    <section class="catalog-stats" aria-label="Equipment summary">
+      <article class="catalog-stat">
+        <span class="catalog-stat__icon catalog-stat__icon--blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5M3 16l9 5 9-5"></path></svg>
+        </span>
+        <span><small>Equipments in our collection</small><strong><%= totals.total %></strong><em>Across <%= counts.length %> categories</em></span>
+      </article>
+      <article class="catalog-stat">
+        <span class="catalog-stat__icon catalog-stat__icon--green" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
+        </span>
+        <span><small>Ready to borrow</small><strong><%= totals.ready %></strong><em>Across <%= counts.length %> categories</em></span>
+      </article>
+      <article class="catalog-stat">
+        <span class="catalog-stat__icon catalog-stat__icon--purple" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"></path><path d="m3 8 9 5 9-5m-9 5v8"></path></svg>
+        </span>
+        <span><small>Your active borrowing</small><strong><%= totals.activeBorrow %></strong><em>Current items</em></span>
+      </article>
+    </section>
+  <% } %>
+
+  <% if (!category) { %>
+  <section class="catalog-explore" aria-labelledby="catalog-explore-title">
+    <div class="catalog-section-heading">
+      <div>
+        <h2 id="catalog-explore-title"><%= category ? 'Explore other categories' : 'Explore Equipment' %></h2>
+        <p><%= category ? 'Choose another category or browse the complete collection.' : 'Choose a category to find what you need.' %></p>
+      </div>
+    </div>
+
+    <form class="catalog-search" method="get" action="/equipment" role="search">
+      <% if (category) { %><input type="hidden" name="category" value="<%= category %>"><% } %>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+      <label class="visually-hidden" for="catalog-search-input">Search equipment</label>
+      <input id="catalog-search-input" name="q" value="<%= q %>" placeholder="Search all equipment...">
+      <button class="btn" type="submit">Filter</button>
+    </form>
+
+    <div class="catalog-category-grid">
+      <% counts.forEach(function(c, index) { %>
+        <a class="catalog-category-card" href="/equipment?category=<%= encodeURIComponent(c.name) %>">
+          <span class="catalog-category-card__art catalog-category-card__art--<%= index %>" aria-hidden="true">
+            <% if (c.name === 'Audio & Visual') { %>
+              <svg viewBox="0 0 160 92"><rect x="28" y="22" width="88" height="48" rx="5"></rect><path d="M43 34h47v25H43zM98 38h8m-8 9h8"></path><circle cx="129" cy="55" r="11"></circle><path d="m126 49 10 6-10 6z"></path></svg>
+            <% } else if (c.name === 'Computer & Accessories') { %>
+              <svg viewBox="0 0 160 92"><rect x="30" y="17" width="82" height="52" rx="5"></rect><path d="M38 25h66v36H38zM61 76h21m-10-7v7m29 7H48"></path><rect x="121" y="38" width="17" height="32" rx="3"></rect></svg>
+            <% } else if (c.name === 'Sports & Recreation') { %>
+              <svg viewBox="0 0 160 92"><circle cx="80" cy="47" r="31"></circle><path d="m80 16 12 17-7 21H75l-7-21 12-17Zm-31 42 19-4m24 0 19 4M61 73l14-19m10 0 14 19"></path></svg>
+            <% } else if (c.name === 'Event Supplies') { %>
+              <svg viewBox="0 0 160 92"><path d="M35 34h90v7H35zm10 7v38m70-38v38M37 79h86M80 19v15m-9-7 9-9 9 9"></path><path d="M54 48h52v27H54z"></path></svg>
+            <% } else if (c.name === 'Tools & Maintenance') { %>
+              <svg viewBox="0 0 160 92"><path d="m43 24 18 18-9 9-18-18a19 19 0 0 0 24 24l37 37 12-12-37-37a19 19 0 0 0-27-21Zm55 4 25-18 8 8-18 25m-8-17 15 15-30 30-15-15z"></path></svg>
+            <% } else { %>
+              <svg viewBox="0 0 160 92"><path d="m80 14 42 23-42 23-42-23 42-23Zm-42 37 42 23 42-23M38 63l42 23 42-23"></path></svg>
+            <% } %>
+          </span>
+          <span class="catalog-category-card__body">
+            <span class="catalog-category-card__title"><%= c.name %><span aria-hidden="true">↗</span></span>
+            <span class="catalog-category-card__description"><%= c.items %> item<%= c.items === 1 ? '' : 's' %> in this category</span>
+            <span class="catalog-category-card__available"><%= c.available %> available</span>
+          </span>
+        </a>
+      <% }); %>
+    </div>
+  </section>
+  <% } else { %>
+  <form class="catalog-search" method="get" action="/equipment" role="search">
+    <input type="hidden" name="category" value="<%= category %>">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+    <label class="visually-hidden" for="catalog-search-input">Search equipment in <%= category %></label>
+    <input id="catalog-search-input" name="q" value="<%= q %>" placeholder="Search in <%= category %>...">
+    <button class="btn" type="submit">Filter</button>
+  </form>
+
+  <section class="catalog-items" aria-labelledby="catalog-items-title">
+    <div class="catalog-section-heading catalog-items__heading">
+      <div>
+        <h2 id="catalog-items-title">Items in <%= category %></h2>
+        <p><%= list.length %> item<%= list.length === 1 ? '' : 's' %><%= q ? ' matching your search' : '' %></p>
+      </div>
+    </div>
+    <% if (!list.length) { %>
+      <p class="catalog-empty">No equipment found in this category<%= q ? ' matching your search' : '' %>.</p>
+    <% } else { %>
+      <div class="catalog-item-grid">
+        <% list.forEach(function(i) { %>
+          <article class="catalog-item-card">
+            <div class="catalog-item-card__visual" aria-hidden="true">
+              <svg viewBox="0 0 120 84"><path d="m60 12 43 23-43 23-43-23 43-23Z"></path><path d="m17 45 43 23 43-23M17 55l43 23 43-23"></path></svg>
+            </div>
+            <div class="catalog-item-card__content">
+              <span class="catalog-item-card__category"><%= i.category %></span>
+              <h3><%= i.name %></h3>
+              <p><%= i.spec || 'Equipment available for borrowing.' %></p>
+              <div class="catalog-item-card__footer">
+                <span class="<%= i.available ? 'catalog-available' : 'catalog-unavailable' %>"><%= i.available %> out of <%= i.total %> available</span>
+                <small>Up to <%= i.maxDays %> days</small>
+              </div>
+              <button class="btn btn-primary catalog-borrow-button" type="button" data-borrow-item
+                data-id="<%= i.id %>"
+                data-name="<%= i.name %>"
+                data-category="<%= i.category %>"
+                data-spec="<%= i.spec || '' %>"
+                data-available="<%= i.available %>"
+                data-total="<%= i.total %>"
+                data-max-days="<%= i.maxDays %>"
+                <%= i.available ? '' : 'disabled' %>>Borrow item</button>
+            </div>
+          </article>
+        <% }); %>
+      </div>
+    <% } %>
+  </section>
+  <% } %>
+</section>
+
+<dialog class="catalog-borrow-dialog" id="catalog-borrow-dialog" aria-labelledby="borrow-dialog-title" <%= borrowItem ? 'data-open-on-load' : '' %>>
+  <form class="catalog-borrow-form" id="catalog-borrow-form" method="post">
+    <header class="catalog-borrow-dialog__header">
+      <div>
+        <p class="catalog-eyebrow">EQUIPMENT BORROWING</p>
+        <h2 id="borrow-dialog-title">Borrow Equipment</h2>
+        <p>Fill out the form to submit a borrowing request.</p>
+      </div>
+      <button class="catalog-dialog-close" type="button" data-close-borrow aria-label="Close borrowing form">×</button>
+    </header>
+    <div class="catalog-borrow-dialog__body">
+      <% if (flash && flash.type === 'error') { %>
+        <p class="catalog-borrow-error" role="alert"><%= flash.text %></p>
+      <% } %>
+      <section class="catalog-borrow-item" aria-label="Selected equipment">
+        <div class="catalog-borrow-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5M3 16l9 5 9-5"></path></svg>
+        </div>
+        <div><strong id="borrow-item-name"></strong><small id="borrow-item-spec"></small><span id="borrow-item-stock"></span></div>
+      </section>
+      <section class="catalog-borrow-fields">
+        <h3>Borrowing Details</h3>
+        <p>Please provide the required information below.</p>
+        <div class="catalog-borrow-grid">
+          <div><label for="borrower-name">Borrower Name</label><input id="borrower-name" value="<%= user.name %>" disabled></div>
+          <div><label for="borrower-id">Student ID</label><input id="borrower-id" value="<%= user.schoolId %>" disabled></div>
+          <div><label for="borrower-course">Department / Course</label><input id="borrower-course" value="<%= user.course %>" disabled></div>
+          <div><label for="borrower-item-name">Item</label><input id="borrower-item-name" disabled></div>
+          <div>
+            <label for="borrow-quantity">Quantity</label>
+            <div class="catalog-quantity-control">
+              <button type="button" data-quantity-change="-1" aria-label="Decrease quantity">−</button>
+              <input id="borrow-quantity" name="quantity" type="number" min="1" value="1" required>
+              <button type="button" data-quantity-change="1" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+          <div><label for="borrow-date-needed">Date Needed</label><input id="borrow-date-needed" name="dateNeeded" type="date" required></div>
+          <div class="catalog-borrow-grid__wide"><label for="borrow-return-date">Expected Date Return</label><input id="borrow-return-date" name="returnDate" type="date" required></div>
+          <div class="catalog-borrow-grid__wide"><label for="borrow-purpose">Purpose of Borrowing</label><textarea id="borrow-purpose" name="purpose" rows="3" required></textarea></div>
+          <div class="catalog-borrow-grid__wide"><label for="borrow-notes">Notes <span>(Optional)</span></label><textarea id="borrow-notes" name="notes" rows="2"></textarea></div>
+          <label class="catalog-borrow-agreement catalog-borrow-grid__wide"><input type="checkbox" name="agree" value="1" required><span>I acknowledge that I agree to the equipment borrowing rules and regulations.</span></label>
+        </div>
+      </section>
+    </div>
+    <footer class="catalog-borrow-dialog__footer">
+      <button class="btn btn-primary" type="submit">Submit Borrowing Request</button>
+      <button class="btn" type="button" data-close-borrow>Cancel</button>
+    </footer>
+  </form>
+</dialog>
+<% if (borrowItem) { %>
+  <script type="application/json" id="borrow-item-initial"><%- JSON.stringify({ id: borrowItem.id, name: borrowItem.name, category: borrowItem.category, spec: borrowItem.spec || '', available: borrowItem.available, total: borrowItem.total, maxDays: borrowItem.maxDays }).replace(/</g, '\\u003c') %></script>
+<% } %>
+<script src="/js/student-catalog.js"></script>
+<%- include('partials/foot') %>

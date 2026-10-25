@@ -1,58 +1,29 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Equipment Borrowing System</title>
-    <link rel="stylesheet" href="css/login.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · CCS OrgHub</title>
+  <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
-    <main class="login-container">
-        <section class="login-card">
-            <div class="logo">Hiram</div>
-
-            <h1>Welcome</h1>
-            <p class="subtitle">Equipment Borrowing System</p>
-            <p class="instruction">Sign in to manage your equipment requests.</p>
-
-            <form action="/login" method="POST">
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        autocomplete="username"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
-                        required
-                    >
-                </div>
-
-                <button type="submit">Login</button>
-            </form>
-
-            <p class="signup-link">
-                Don't have an account yet?
-                <a href="/signup">Sign Up</a>
-            </p>
-            
-            <p class="footer-text">
-                Equipment Borrowing System
-            </p>
-        </section>
-    </main>
+  <main class="auth-card">
+    <div class="auth-brand"><span class="brand-mark" aria-hidden="true">◈</span> CCS OrgHub</div>
+    <h1>Welcome back</h1>
+    <p class="muted">Sign in to manage your organization.</p>
+    <% if (error) { %><div class="error" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/login">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="<%= form.email || '' %>" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+      <button type="submit">Sign in</button>
+    </form>
+    <p class="alt">No account yet? <a href="/signup">Create one</a></p>
+    <details class="demo">
+      <summary>Demo accounts</summary>
+      <p>admin@ccs.edu · adviser@ccs.edu · officer@ccs.edu · member@ccs.edu<br>Password: <code>password123</code></p>
+    </details>
+  </main>
 </body>
 </html>

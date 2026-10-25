@@ -1,0 +1,37 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Event Reports</h1>
+<p class="muted">Submit a report after an activity is completed.</p>
+
+<% if (user.role === 'officer') { %>
+<details class="card" <%= reportable.length ? 'open' : '' %>>
+  <summary><strong>+ Submit report</strong></summary>
+  <% if (!reportable.length) { %>
+    <p class="muted">No completed events are waiting for a report. Mark an event as completed first.</p>
+  <% } else { %>
+  <form method="post" action="/reports">
+    <label for="eventId">Event</label>
+    <select id="eventId" name="eventId" required>
+      <% reportable.forEach(function(e){ %><option value="<%= e.id %>"><%= e.title %> (<%= e.date %>)</option><% }) %>
+    </select>
+    <label for="summary">Summary</label>
+    <textarea id="summary" name="summary" rows="3" required></textarea>
+    <label for="outcome">Outcome / lessons learned</label>
+    <textarea id="outcome" name="outcome" rows="3" required></textarea>
+    <label for="budgetSpent">Budget spent (₱)</label>
+    <input id="budgetSpent" name="budgetSpent" type="number" min="0" step="0.01" value="0">
+    <button class="btn btn-primary" type="submit">Submit report</button>
+  </form>
+  <% } %>
+</details>
+<% } %>
+
+<% if (!reports.length) { %><div class="card"><p class="muted">No reports submitted yet.</p></div><% } %>
+<% reports.forEach(function(r){ %>
+  <article class="card">
+    <h3><%= r.event.title %></h3>
+    <p><%= r.summary %></p>
+    <p><strong>Outcome:</strong> <%= r.outcome %></p>
+    <small class="muted"><%= r.attendeeCount %> attendees · ₱<%= r.budgetSpent %> · by <%= r.author %> · <%= r.createdAt.slice(0,10) %></small>
+  </article>
+<% }) %>
+<%- include('partials/foot') %>

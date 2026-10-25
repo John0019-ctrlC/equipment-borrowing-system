@@ -1,0 +1,68 @@
+<%- include('partials/head', { title: title, styles: (user.role === 'admin' ? ['/css/event-management.css'] : []) }) %>
+<h1>Events</h1>
+<p class="muted">Browse scheduled activities and manage event details.</p>
+
+<% if (user.role === 'officer' || user.role === 'admin') { %>
+<details class="card">
+  <summary><strong>+ Post new event</strong></summary>
+  <form method="post" action="/events" class="grid-form">
+    <div><label for="event-title">Title</label><input id="event-title" name="title" required></div>
+    <div><label for="event-date">Date</label><input id="event-date" name="date" type="date" required></div>
+    <div><label for="event-time">Time</label><input id="event-time" name="time" type="time" required></div>
+    <div><label for="event-venue">Location</label><input id="event-venue" name="venue" required></div>
+    <div><label for="event-limit">Participant limit (0 = unlimited)</label><input id="event-limit" name="limit" type="number" min="0" value="0"></div>
+    <div class="full"><label for="event-description">Description</label><textarea id="event-description" name="description" rows="2"></textarea></div>
+    <div class="full"><button class="btn btn-primary" type="submit">Post event</button></div>
+  </form>
+</details>
+<% } %>
+
+<div class="tabs" aria-label="Filter events">
+  <% var eventTabs = [['all','All'],['upcoming','Upcoming'],['completed','Completed'],['mine','My registrations']]; %>
+  <% if (user.role === 'member') eventTabs.push(['attended','Attended']); %>
+  <% eventTabs.forEach(function(tab){ %>
+    <a class="tab <%= filter === tab[0] ? 'is-active' : '' %>" href="/events?filter=<%= tab[0] %><%= q ? '&amp;q=' + encodeURIComponent(q) : '' %>"><%= tab[1] %></a>
+  <% }) %>
+</div>
+
+<section class="card table-card">
+  <h2 class="table-card__title">Events Overview</h2>
+  <form class="table-search" method="get" action="/events">
+    <input type="hidden" name="filter" value="<%= filter %>">
+    <label class="visually-hidden" for="event-search">Search events</label>
+    <input id="event-search" name="q" type="search" value="<%= q %>" placeholder="Search events by name, date, location, or status">
+    <button class="btn" type="submit">Search</button>
+  </form>
+  <div class="table-scroll">
+    <table class="table overview-table">
+      <thead><tr><th>Event Name</th><th>Date</th><th>Location</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        <% if (!events.length) { %>
+          <tr><td colspan="5" class="table-empty">No events found.</td></tr>
+        <% } %>
+        <% events.forEach(function(event){ %>
+          <tr>
+            <td><strong><%= event.title %></strong><% if (event.time) { %><small><%= event.time %></small><% } %></td>
+            <td><%= event.date %></td>
+            <td><%= event.venue %></td>
+            <td><span class="badge <%= event.status === 'completed' ? 'badge-returned' : event.status === 'cancelled' ? 'badge-rejected' : event.isFull ? 'badge-pending' : 'badge-approved' %>"><%= event.status === 'open' && event.isFull ? 'Full' : (event.status || 'open') %></span></td>
+            <td>
+              <div class="table-actions">
+                <a class="btn btn-primary btn-sm" href="/events/<%= event.id %>">View</a>
+                <% if (user.role === 'admin') { %>
+                  <a class="btn btn-sm" href="/events/<%= event.id %>/edit">Modify</a>
+                  <form method="post" action="/events/<%= event.id %>/delete" class="inline" onsubmit="return confirm('Delete this event? Its registrations and attendance records will also be removed.');">
+                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                  </form>
+                <% } else if (user.role === 'officer') { %>
+                  <a class="btn btn-sm" href="/attendance/<%= event.id %>">Attendance</a>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+<%- include('partials/foot') %>

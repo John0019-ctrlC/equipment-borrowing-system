@@ -1,0 +1,9 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/events/<%= event.id %>"><%= event.title %></a> &gt; My QR</p>
+<h1>Your check-in QR</h1>
+<p class="muted">Show this to an officer at the entrance of <strong><%= event.title %></strong>.</p>
+<section class="card qr-card">
+  <img src="<%= qr %>" alt="QR code for event check-in" width="240" height="240">
+  <p class="muted">Can't scan? Give your School ID: <strong><%= user.schoolId %></strong></p>
+</section>
+<%- include('partials/foot') %>
