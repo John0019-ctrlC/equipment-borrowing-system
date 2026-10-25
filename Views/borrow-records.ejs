@@ -1,0 +1,19 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Borrowing Records</h1>
+<p class="muted">Manage available equipment in the system</p>
+
+<table class="table card table-navy">
+  <thead><tr><th>Request ID</th><th>Borrower Name</th><th>Department / Course</th><th>Equipment</th><th>Date Needed</th><th>Return Date</th><th>Status</th><th>Action</th></tr></thead>
+  <tbody>
+    <% if (!records.length) { %><tr><td colspan="8" class="muted center">No records yet.</td></tr><% } %>
+    <% records.forEach(function(b){ %>
+      <tr>
+        <td><%= b.code %></td><td><%= b.borrower %></td><td><%= b.course %></td><td><%= b.equipment %></td>
+        <td><%= b.dateNeeded %></td><td><%= b.returnDate %></td>
+        <td><span class="badge badge-<%= b.status2 %>"><%= b.status2 %></span></td>
+        <td><a class="btn btn-sm" href="/borrowing/requests/<%= b.id %>">View</a></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/foot') %>

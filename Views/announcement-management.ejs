@@ -1,0 +1,186 @@
+<%- include('partials/head', { title: title, styles: ['/css/announcement-management.css'] }) %>
+
+<section class="announcement-management">
+  <header class="announcement-page-heading">
+    <div>
+      <p class="announcement-eyebrow">ADMINISTRATION</p>
+      <h1>Announcements</h1>
+      <p>Create, publish, and manage system-wide announcements for students and faculty.</p>
+    </div>
+    <button class="btn btn-primary announcement-create" type="button" data-create-announcement>
+      <span aria-hidden="true">+</span> Create New Announcement
+    </button>
+  </header>
+
+  <section class="announcement-stats" aria-label="Announcement summary">
+    <article class="announcement-stat">
+      <span class="announcement-stat__label">Total Announcements</span>
+      <strong><%= stats.total %></strong>
+      <span class="announcement-stat__hint">Active items</span>
+    </article>
+    <article class="announcement-stat">
+      <span class="announcement-stat__label">Published</span>
+      <strong><%= stats.published %></strong>
+      <span class="announcement-stat__hint announcement-stat__hint--live">Visible to users</span>
+    </article>
+    <article class="announcement-stat">
+      <span class="announcement-stat__label">Drafts</span>
+      <strong><%= stats.drafts %></strong>
+      <span class="announcement-stat__hint">Draft or scheduled</span>
+    </article>
+    <article class="announcement-stat announcement-stat--priority">
+      <span class="announcement-stat__label">Pinned / Urgent</span>
+      <strong><%= stats.priority %></strong>
+      <span class="announcement-stat__hint">Priority announcements</span>
+    </article>
+  </section>
+
+  <section class="announcement-list-panel">
+    <form class="announcement-filters" method="get" action="/announcements" role="search">
+      <label class="announcement-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+        <span class="visually-hidden">Search announcements</span>
+        <input type="search" name="q" value="<%= filters.q %>" placeholder="Search announcements...">
+      </label>
+      <label class="visually-hidden" for="announcement-status-filter">Status</label>
+      <select id="announcement-status-filter" name="status">
+        <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Status: All</option>
+        <option value="live" <%= filters.status === 'live' ? 'selected' : '' %>>Status: Live</option>
+        <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Status: Draft</option>
+      </select>
+      <label class="visually-hidden" for="announcement-target-filter">Target audience</label>
+      <select id="announcement-target-filter" name="target">
+        <option value="all" <%= filters.target === 'all' ? 'selected' : '' %>>Target: All</option>
+        <option value="students" <%= filters.target === 'students' ? 'selected' : '' %>>Target: Students</option>
+        <option value="faculty" <%= filters.target === 'faculty' ? 'selected' : '' %>>Target: Faculty</option>
+      </select>
+      <button class="btn announcement-filter-button" type="submit">Filter</button>
+    </form>
+
+    <div class="announcement-table-scroll">
+      <table class="announcement-table">
+        <thead>
+          <tr><th>Announcement</th><th>Target</th><th>Priority</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% if (!items.length) { %>
+            <tr><td colspan="6" class="announcement-empty">No announcements match these filters.</td></tr>
+          <% } %>
+          <% items.forEach(function(item) { %>
+            <tr class="<%= item.displayStatus === 'Archived' ? 'is-archived' : '' %>">
+              <td class="announcement-cell">
+                <% if (item.pinned) { %><span class="announcement-pin-indicator" title="Pinned" aria-label="Pinned">◆</span><% } %>
+                <div>
+                  <a class="announcement-row-title" href="/announcements/<%= item.id %>"><%= item.title %></a>
+                  <p><%= item.message.length > 150 ? item.message.slice(0, 150) + '…' : item.message %></p>
+                </div>
+              </td>
+              <td><span class="announcement-tag"><%= item.audience === 'All members' ? 'All Users' : item.audience %></span></td>
+              <td><span class="announcement-priority announcement-priority--<%= item.priority || 'normal' %>"><%= item.priority || 'Normal' %></span></td>
+              <td class="announcement-date">
+                <%= item.createdAt.slice(0, 10) %>
+                <% if (item.publishAt && item.displayStatus === 'Scheduled') { %><small>Publishes <%= item.publishAt.slice(0, 16).replace('T', ' ') %></small><% } %>
+              </td>
+              <td><span class="announcement-status announcement-status--<%= item.displayStatus.toLowerCase() %>"><%= item.displayStatus %></span></td>
+              <td>
+                <div class="announcement-actions">
+                  <button class="announcement-icon-button" type="button" title="Edit announcement" aria-label="Edit <%= item.title %>"
+                    data-edit-announcement
+                    data-id="<%= item.id %>"
+                    data-title="<%= item.title %>"
+                    data-message="<%= item.message %>"
+                    data-audience="<%= ['All Users','Students','Faculty'].includes(item.audience) ? item.audience : item.targetGroup === 'students' ? 'Students' : item.targetGroup === 'faculty' ? 'Faculty' : 'All Users' %>"
+                    data-priority="<%= item.priority || 'normal' %>"
+                    data-pinned="<%= item.pinned === true %>"
+                    data-status="<%= item.status === 'draft' ? 'draft' : 'live' %>"
+                    data-publish-at="<%= item.publishAt || '' %>"
+                    data-attachment-url="<%= item.attachmentUrl || '' %>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                  </button>
+                  <form method="post" action="/announcements/<%= item.id %>/pin">
+                    <button class="announcement-icon-button <%= item.pinned ? 'is-selected' : '' %>" type="submit" title="<%= item.pinned ? 'Unpin announcement' : 'Pin announcement' %>" aria-label="<%= item.pinned ? 'Unpin ' : 'Pin ' %><%= item.title %>">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4v5l-2 2-2-7-7-2 2-2h5l4-4Z"></path><path d="m5 19-2 2"></path></svg>
+                    </button>
+                  </form>
+                  <% if (item.displayStatus !== 'Archived') { %>
+                    <form method="post" action="/announcements/<%= item.id %>/archive" onsubmit="return confirm('Archive this announcement?');">
+                      <button class="announcement-icon-button" type="submit" title="Archive announcement" aria-label="Archive <%= item.title %>">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3z"></path><path d="M5 8v12h14V8M10 12h4"></path></svg>
+                      </button>
+                    </form>
+                  <% } %>
+                  <form method="post" action="/announcements/<%= item.id %>/delete" onsubmit="return confirm('Permanently delete this announcement?');">
+                    <button class="announcement-icon-button announcement-icon-button--delete" type="submit" title="Delete announcement" aria-label="Delete <%= item.title %>">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"></path></svg>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<dialog class="announcement-dialog" id="announcement-editor" aria-labelledby="announcement-editor-title">
+  <form class="announcement-editor-form" method="post" action="/announcements/manage" id="announcement-form">
+    <header class="announcement-dialog__header">
+      <div>
+        <p class="announcement-eyebrow">ANNOUNCEMENT EDITOR</p>
+        <h2 id="announcement-editor-title">Create announcement</h2>
+      </div>
+      <button class="announcement-icon-button" type="button" data-close-announcement aria-label="Close editor">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
+    </header>
+    <div class="announcement-dialog__body">
+      <label for="announcement-title">Title</label>
+      <input id="announcement-title" name="title" maxlength="160" placeholder="CCS Week Kickoff Schedule Updated" required>
+
+      <div class="announcement-form-grid">
+        <div>
+          <label for="announcement-audience">Target audience</label>
+          <select id="announcement-audience" name="audience" required>
+            <option>All Users</option><option>Students</option><option>Faculty</option>
+          </select>
+        </div>
+        <div>
+          <label for="announcement-priority">Priority</label>
+          <select id="announcement-priority" name="priority" required>
+            <option value="normal">Normal</option><option value="important">Important</option><option value="urgent">Urgent Alert</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="announcement-publish-at">Publish date &amp; time <span class="announcement-optional">(leave empty to publish now)</span></label>
+      <input id="announcement-publish-at" name="publishAt" type="datetime-local">
+
+      <label for="announcement-message">Content</label>
+      <div class="announcement-editor-toolbar" role="toolbar" aria-label="Content formatting">
+        <button type="button" data-format="bold" title="Bold"><strong>B</strong></button>
+        <button type="button" data-format="italic" title="Italic"><em>I</em></button>
+        <button type="button" data-format="bullet" title="Bulleted list">• List</button>
+        <button type="button" data-format="number" title="Numbered list">1. List</button>
+        <button type="button" data-format="link" title="Add link">Link</button>
+      </div>
+      <textarea id="announcement-message" name="message" rows="8" placeholder="Write your announcement. Use the toolbar for **bold**, _italic_, lists, and links." required></textarea>
+      <p class="announcement-editor-hint">Formatting uses **bold**, _italic_, list markers, and [link text](https://example.com).</p>
+
+      <label for="announcement-attachment">File or image URL <span class="announcement-optional">(optional)</span></label>
+      <input id="announcement-attachment" name="attachmentUrl" type="url" placeholder="https://example.com/attachment">
+
+      <label class="announcement-pin-option">
+        <input type="checkbox" name="pinned">
+        <span><strong>Pin this announcement to the dashboard</strong><small>Keep this notice above other announcements.</small></span>
+      </label>
+    </div>
+    <footer class="announcement-dialog__footer">
+      <button class="btn announcement-secondary-button" type="submit" name="state" value="draft">Save as Draft</button>
+      <button class="btn btn-primary" type="submit" name="state" value="live">Publish Announcement</button>
+    </footer>
+  </form>
+</dialog>
+<script src="/js/announcement-management.js"></script>
+<%- include('partials/foot') %>

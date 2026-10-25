@@ -1,0 +1,22 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/events">Events</a> &gt; Modify event</p>
+<h1>Modify event</h1>
+<section class="card edit-form-card">
+  <form method="post" action="/events/<%= event.id %>/edit" class="grid-form">
+    <div><label for="event-title">Event name</label><input id="event-title" name="title" value="<%= event.title %>" required></div>
+    <div><label for="event-date">Date</label><input id="event-date" name="date" type="date" value="<%= event.date %>" required></div>
+    <div><label for="event-time">Time</label><input id="event-time" name="time" type="time" value="<%= event.time %>" required></div>
+    <div><label for="event-venue">Location</label><input id="event-venue" name="venue" value="<%= event.venue %>" required></div>
+    <div><label for="event-limit">Participant limit (0 = unlimited)</label><input id="event-limit" name="limit" type="number" min="0" value="<%= event.limit || 0 %>" required></div>
+    <div><label for="event-status">Status</label>
+      <select id="event-status" name="status" required>
+        <% [['open','Open'],['completed','Completed'],['cancelled','Cancelled']].forEach(function(status){ %>
+          <option value="<%= status[0] %>" <%= event.status === status[0] ? 'selected' : '' %>><%= status[1] %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="full"><label for="event-description">Description</label><textarea id="event-description" name="description" rows="4"><%= event.description || '' %></textarea></div>
+    <div class="full actions"><button class="btn btn-primary" type="submit">Save changes</button><a class="btn" href="/events">Cancel</a></div>
+  </form>
+</section>
+<%- include('partials/foot') %>

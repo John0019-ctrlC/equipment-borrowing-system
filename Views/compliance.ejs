@@ -1,0 +1,24 @@
+<%- include('partials/head', { title: title }) %>
+<h1>Organization Compliance</h1>
+<p class="muted">Submitted reports and active members across organizations.</p>
+
+<table class="table card">
+  <thead>
+    <tr><th>Organization</th><th>Active members</th><th>Events</th><th>Completed</th><th>Reports filed</th><th>Missing reports</th><th>Pending approvals</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <% orgs.forEach(function(o){ %>
+      <tr>
+        <td><strong><%= o.name %></strong></td>
+        <td><%= o.activeMembers %></td>
+        <td><%= o.events %></td>
+        <td><%= o.completed %></td>
+        <td><%= o.reports %></td>
+        <td><%= o.missingReports %></td>
+        <td><%= o.pending %></td>
+        <td><span class="badge <%= o.compliant ? 'badge-approved' : 'badge-overdue' %>"><%= o.compliant ? 'Compliant' : 'Action needed' %></span></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/foot') %>

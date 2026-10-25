@@ -1,0 +1,28 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/events">Events</a> &gt; <%= event.title %></p>
+<h1><%= event.title %></h1>
+<p class="muted"><%= event.date %> · <%= event.time %> · <%= event.venue %></p>
+
+<section class="card">
+  <p><%= event.description || 'No description provided.' %></p>
+  <p><strong><%= event.registered %></strong><%= event.limit ? ' of ' + event.limit : '' %> registered
+    <% if (event.isFull) { %> · <span class="badge badge-pending">Full</span><% } %></p>
+
+  <div class="actions">
+    <% if ((user.role === 'member' || user.role === 'officer') && event.isRegistered) { %>
+      <a class="btn btn-primary" href="/attendance/my-qr/<%= event.id %>">Show my QR</a>
+      <form method="post" action="/events/<%= event.id %>/cancel" class="inline"><button class="btn" type="submit">Cancel registration</button></form>
+    <% } else if (user.role === 'member' || user.role === 'officer') { %>
+      <form method="post" action="/events/<%= event.id %>/register" class="inline">
+        <button class="btn btn-primary" type="submit" <%= (event.isFull || event.status !== 'open') ? 'disabled' : '' %>>Register</button>
+      </form>
+    <% } %>
+    <% if (user.role === 'officer' || user.role === 'admin') { %>
+      <a class="btn" href="/attendance/<%= event.id %>">Open attendance</a>
+      <% if (event.status !== 'completed') { %>
+        <form method="post" action="/events/<%= event.id %>/complete" class="inline"><button class="btn" type="submit">Mark completed</button></form>
+      <% } %>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/foot') %>

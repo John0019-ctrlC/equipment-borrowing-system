@@ -1,0 +1,17 @@
+<%- include('partials/head', { title: title }) %>
+<p class="crumb"><a href="/announcements">Announcements</a> &gt; <%= announcement.title %></p>
+<article class="card announcement-detail">
+  <h1><%= announcement.title %></h1>
+  <p class="muted"><%= announcement.author %> · <%= announcement.createdAt.slice(0, 10) %> · <%= announcement.audience || 'All members' %></p>
+  <div class="announcement-detail__message"><%- announcement.contentHtml || announcement.message %></div>
+  <% if (announcement.attachmentUrl) { %>
+    <p><a href="<%= announcement.attachmentUrl %>" target="_blank" rel="noopener noreferrer">Open attached file or image</a></p>
+  <% } %>
+  <% if (user.role === 'admin') { %>
+    <div class="actions">
+      <a class="btn" href="/announcements/<%= announcement.id %>/edit">Modify</a>
+      <form method="post" action="/announcements/<%= announcement.id %>/delete" class="inline" onsubmit="return confirm('Delete this announcement?');"><button class="btn btn-danger" type="submit">Delete</button></form>
+    </div>
+  <% } %>
+</article>
+<%- include('partials/foot') %>

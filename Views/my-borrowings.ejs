@@ -1,0 +1,104 @@
+<%- include('partials/head', { title: title, styles: ['/css/my-borrowings.css'] }) %>
+<section class="my-borrowings">
+  <header class="my-borrowings__header">
+    <div>
+      <p class="my-borrowings__eyebrow">EQUIPMENT</p>
+      <h1>My Borrowings</h1>
+      <p>Track what you have borrowed and when it is due back.</p>
+    </div>
+  </header>
+
+  <nav class="my-borrowings__stats" aria-label="Filter borrowings by status">
+    <a class="my-borrowing-stat <%= tab === 'active' ? 'is-active' : '' %>" href="/borrowing/mine?tab=active" <%= tab === 'active' ? 'aria-current="page"' : '' %>>
+      <span class="my-borrowing-stat__label">Your active borrowing</span>
+      <strong><%= lists.active.length %></strong>
+      <span class="my-borrowing-stat__icon my-borrowing-stat__icon--active" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5M3 16l9 5 9-5"></path></svg>
+      </span>
+    </a>
+    <a class="my-borrowing-stat <%= tab === 'pending' ? 'is-active' : '' %>" href="/borrowing/mine?tab=pending" <%= tab === 'pending' ? 'aria-current="page"' : '' %>>
+      <span class="my-borrowing-stat__label">Pending requests</span>
+      <strong><%= lists.pending.length %></strong>
+      <span class="my-borrowing-stat__icon my-borrowing-stat__icon--pending" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      </span>
+      <small>Waiting for approval</small>
+    </a>
+    <a class="my-borrowing-stat <%= tab === 'returned' ? 'is-active' : '' %>" href="/borrowing/mine?tab=returned" <%= tab === 'returned' ? 'aria-current="page"' : '' %>>
+      <span class="my-borrowing-stat__label">Returned</span>
+      <strong><%= lists.returned.length %></strong>
+      <span class="my-borrowing-stat__icon my-borrowing-stat__icon--returned" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M20 7v5h-5"></path><path d="M19 12a7 7 0 1 1-2-5l3 5"></path></svg>
+      </span>
+    </a>
+    <a class="my-borrowing-stat <%= lists.overdue.length ? 'my-borrowing-stat--overdue' : '' %> <%= tab === 'overdue' ? 'is-active' : '' %>" href="/borrowing/mine?tab=overdue" <%= tab === 'overdue' ? 'aria-current="page"' : '' %>>
+      <span class="my-borrowing-stat__label">Overdue</span>
+      <strong><%= lists.overdue.length %></strong>
+      <span class="my-borrowing-stat__icon my-borrowing-stat__icon--overdue" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4m0 4h.01"></path></svg>
+      </span>
+    </a>
+  </nav>
+
+  <% if (!lists[tab].length) { %>
+    <div class="my-borrowing-empty" role="status">
+      <span class="my-borrowing-empty__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M8 4h8l4 4v12H4V4h4Z"></path><path d="M8 4v5h8V4M8 14h8"></path></svg>
+      </span>
+      <h2>No <%= tab %> borrowings</h2>
+      <p>Your <%= tab %> equipment requests will appear here.</p>
+    </div>
+  <% } %>
+
+  <section class="my-borrowing-list" aria-label="<%= tab %> borrowings">
+    <% lists[tab].forEach(function(b){ %>
+      <article class="my-borrowing-card">
+        <div class="my-borrowing-card__equipment">
+          <span class="my-borrowing-card__thumbnail" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="m24 5 19 10-19 10L5 15 24 5Z"></path><path d="m5 23 19 10 19-10M5 31l19 10 19-10"></path></svg>
+          </span>
+          <div class="my-borrowing-card__details">
+            <p class="my-borrowing-card__category"><%= b.item.category || 'Equipment' %></p>
+            <h2><%= b.equipment %></h2>
+            <div class="my-borrowing-card__metadata">
+              <% if (b.item.spec) { %><span><%= b.item.spec %></span><% } %>
+              <span>Qty <%= b.quantity %></span>
+            </div>
+            <p class="my-borrowing-card__purpose"><strong>Purpose:</strong> <%= b.purpose && b.purpose.trim().length > 3 ? b.purpose : 'No purpose details provided.' %></p>
+          </div>
+        </div>
+        <div class="my-borrowing-card__schedule">
+          <div class="my-borrowing-card__dates">
+            <div><span>Needed date</span><strong><%= b.dateNeeded %></strong></div>
+            <div><span>Due date</span><strong class="my-borrowing-card__due-date"><%= b.returnDate %></strong></div>
+          </div>
+          <div class="my-borrowing-card__actions">
+            <span class="my-borrowing-status my-borrowing-status--<%= b.status2 %>"><%= b.status2 %></span>
+            <% if (b.status === 'approved') { %>
+              <% if (b.extensionRequested) { %>
+                <span class="extension-pending" aria-label="Extension request pending">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                  Extension Pending
+                </span>
+              <% } else { %>
+                <form method="post" action="/borrowing/<%= b.id %>/extension">
+                  <button class="my-borrowing-extension" type="submit">Request Extension</button>
+                </form>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+      </article>
+    <% }) %>
+  </section>
+
+  <% if (dueSoon) { %>
+    <aside class="my-borrowing-reminder" role="note">
+      <span class="my-borrowing-reminder__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      </span>
+      <div><strong>Return reminder</strong><p>Your <strong><%= dueSoon.equipment %></strong> is due on <strong><%= dueSoon.returnDate %></strong>. Please return it to the equipment office.</p></div>
+    </aside>
+  <% } %>
+</section>
+<%- include('partials/foot') %>
